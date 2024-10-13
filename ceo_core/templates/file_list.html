@@ -1,0 +1,318 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File List</title>
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Header Section */
+        .header {
+            background-color: #333;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nav-list li {
+            margin-right: 20px;
+        }
+
+        .nav-list a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .nav-list a:hover {
+            color: #ccc;
+        }
+
+        /* Main Content Section */
+        .main-content {
+            max-width: 1200px;
+            margin: 60px auto 20px; /* Adjusted margin for fixed header */
+            padding: 2rem 1rem;
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .alert {
+            padding: 10px;
+            margin: 20px 0;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #f44336; /* Red background for alert */
+        }
+
+        .alert-info {
+            background-color: #2196F3; /* Blue background for info alerts */
+        }
+
+        .alert-success {
+            background-color: #4CAF50; /* Green background for success alerts */
+        }
+
+        .alert-warning {
+            background-color: #ff9800; /* Orange background for warning alerts */
+        }
+
+        /* Form Styles */
+        form {
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .btn-primary {
+            background-color: #337ab7;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #23527c;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table th,
+        table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        table a {
+            color: #337ab7;
+            text-decoration: none;
+        }
+
+        table a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container">
+                <ul class="nav-list">
+                    {% if request.user.is_authenticated %}
+                        <li><a href="{% url 'ceoindex' %}">Home</a></li>
+                        <li><a href="{% url 'signup' %}">Users</a></li>
+                        <li><a href="{% url 'file_list' %}">Files</a></li>
+                        <li><a href="{% url 'asignTask' %}">Tasks</a></li>
+                        <li><a href="{% url 'user_list' %}">Chat</a></li>
+                        <li><a href="{% url 'ai' %}">Kero</a></li>
+                        <li><a href="{% url 'notifications' %}">Notifications</a></li>
+                        <li><a href="{% url 'videosetup' %}">meeting</a></li>
+                        <li><a href="{% url 'ceo_profile' %}">Profile</a></li>
+                        <li><a href="{% url 'logout' %}">Logout</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Section -->
+    <main class="main-content">
+        <!-- Message Display Section -->
+        {% for message in messages %}
+        <div id="myAlert" class="alert alert-{{ message.tags }}" role="alert">
+            <p>{{ message }}</p>
+        </div>
+        {% endfor %}
+
+        <h1>Search</h1>
+        <form method="get" action="{% url 'file_list' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="search">Search by File Title:</label>
+                <input type="text" id="search" name="search" value="{{ request.GET.search }}" placeholder="Search files...">
+            </div>
+            <div class="form-group">
+                <label for="user">Search by User:</label>
+                <input type="text" id="user" name="user" placeholder="Search users...">
+            </div>
+            <button type="submit" class="btn-primary">Search</button>
+        </form>
+
+        <h2>Results</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Download</th>
+                    <th>Delete</th>
+                    <th>Owner User</th>
+                    <th>Sent By</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if results %}
+                    {% for result in results %}
+                    <tr>
+                        <td>{{ result.title }}</td>
+                        <td><a href="{% url 'file_download' result.id %}">Download</a></td>
+                        <td><a href="{% url 'file_delete' result.id %}" onclick="return confirm('Are you sure you want to delete this file?');">Delete</a></td>
+                        <td>{{ result.owner.email }} | {{ result.owner.username }}</td>
+                        <td>
+                            {% if result.sent_by %}
+                                {{ result.sent_by.email }} | {{ result.sent_by.username }}
+                            {% else %}
+                                Not Sent By Anyone
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">No results found.</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="5">No files available.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <h1>Upload File</h1>
+        <form method="post" enctype="multipart/form-data" action="{% url 'file_upload' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" placeholder="optional">
+            </div>
+            <div class="form-group">
+                <label for="file">File:</label>
+                <input type="file" id="file" name="file" required>
+            </div>
+            <button type="submit" class="btn-primary">Upload</button>
+        </form>
+
+        <h2>All Uploaded Reports</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>File</th>
+                    <th>Uploaded At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file_ in reports_list %}
+                <tr>
+                    <td>{{ file_.title }}</td>
+                    <td><a href="{{ file_.file.url }}">Download</a></td>
+                    <td>{{ file_.uploaded_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+
+    <script>
+        var autoRefreshTimeoutId = null;
+
+        function scheduleRefresh() {
+            autoRefreshTimeoutId = setTimeout(function() {
+                window.location.reload(true); // refresh the page
+            }, 10 * 1000); // 5 seconds
+        }
+
+        function clearScheduleRefresh() {
+            clearTimeout(autoRefreshTimeoutId);
+        }
+
+        document.addEventListener('click', function() {
+            clearScheduleRefresh();
+            scheduleRefresh();
+        });
+
+        document.addEventListener('keypress', function() {
+            clearScheduleRefresh();
+            scheduleRefresh();
+        });
+
+        window.onfocus = function() {
+            scheduleRefresh();
+        };
+
+        // Initialize the schedule
+        scheduleRefresh();
+    </script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            padding-top: 60px; /* Adjust for fixed navbar height */
+        }
+
+        /* Header and Navbar Styles */
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 1rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nav-list li {
+            margin-right: 20px;
+        }
+
+        .nav-list a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .nav-list a:hover {
+            color: #ccc;
+        }
+
+        /* Alert Styles */
+        .alert {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            margin: 10px auto;
+            max-width: 1200px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        /* Profile Container */
+        .profile-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-header img {
+            max-width: 150px;
+            height: auto;
+            border-radius: 50%;
+            margin-right: 2rem;
+        }
+
+        .profile-header h1 {
+            margin: 0;
+        }
+
+        .profile-header form {
+            margin-top: 1rem;
+        }
+
+        .profile-details {
+            margin-bottom: 2rem;
+        }
+
+        .profile-details h1 {
+            margin-bottom: 1rem;
+        }
+
+        .list-group {
+            list-style: none;
+            padding: 0;
+        }
+
+        .list-group-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+
+        .list-group-item span {
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 14px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <!-- Message Display Section -->
+    {% for message in messages %}
+    <div id="myAlert" class="alert alert-{{ message.tags }}" role="alert">
+        <p>{{ message }}</p>
+    </div>
+    <script>
+    // Auto-hide alert after 4 seconds
+    setTimeout(() => {
+        document.getElementById('myAlert').style.display = 'none';
+    }, 4000);
+    </script>
+    {% endfor %}
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <ul class="nav-list">
+                {% if request.user.is_authenticated %}
+                <li><a href="{% url 'employeeindex' %}">Home</a></li>
+                <li><a href="{% url 'employee_file_list' %}">Files</a></li>
+                <li><a href="{% url 'employee_profile' %}">Profile</a></li>
+                <li><a href="{% url 'user_list' %}">Chat</a></li>
+                <li><a href="{% url 'ai' %}">Kero</a></li>
+                <li><a href="{% url 'notifications' %}">Notifications</a></li>
+                <li><a href="{% url 'videosetup' %}">meeting</a></li>
+                <li><a href="{% url 'logout' %}">Logout</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <!-- Profile Section -->
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <img src="{{ profile_photo_url }}" alt="Profile Photo" onerror="this.src='/media/default_profile_pic.jpg'">
+        <div>
+            <h1>Welcome, {{ current_user }}!</h1>
+            <form action="{% url 'employee_profile' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <label for="profile_photo">Update Profile Photo:</label>
+                <input type="file" name="profile_photo" id="profile_photo" accept="image/*">
+                <button type="submit" class="btn btn-primary btn-sm">Change Photo</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Profile Details -->
+    <div class="profile-details">
+        <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between">
+                <span>Username:</span>
+                <span>{{ user_x.username }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+                <span>Email:</span>
+                <span>{{ user_x.email }}</span>
+            </li>
+        </ul>
+    </div>
+    <!-- Change Email Form -->
+<form action="{% url 'employee_change_email' user_id=user_x.id %}" method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="current_email">Original Email:</label>
+        <h4>{{ user_x.email }}</h4>
+        <label for="new_email">New Email:</label>
+        <input type="text" id="new_email" name="new_email" required>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Change" class="btn btn-primary">
+    </div>
+</form>
+
+<!-- Change Password Form -->
+<h3>Change Password</h3>
+<form action="{% url 'employee_change_password' user_id=user_x.id %}" method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="new_pass">New Password:</label>
+        <input type="text" id="new_pass" name="new_pass" required>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Change" class="btn btn-primary">
+    </div>
+</form>
+
+<!-- Change Username Form -->
+<h3>Change Username</h3>
+<form action="{% url 'employee_change_username' user_id=user_x.id %}" method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="current_username">Original Username:</label>
+        <h4>{{ user_x.username }}</h4>
+        <label for="new_username">New Username:</label>
+        <input type="text" id="new_username" name="new_username" required>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Change" class="btn btn-primary">
+    </div>
+</form>

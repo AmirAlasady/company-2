@@ -1,0 +1,292 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage User</title>
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        /* Header Section */
+        .header {
+            background-color: #333;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+        }
+
+        .navbar {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nav-list li {
+            margin-right: 20px;
+        }
+
+        .nav-list a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .nav-list a:hover {
+            color: #ccc;
+        }
+
+        /* Main Content Section */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        h1 {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .alert {
+            padding: 10px;
+            margin: 20px 0;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #f44336; /* Red background for alert */
+        }
+
+        .alert-info {
+            background-color: #2196F3; /* Blue background for info alerts */
+        }
+
+        .alert-success {
+            background-color: #4CAF50; /* Green background for success alerts */
+        }
+
+        .alert-warning {
+            background-color: #ff9800; /* Orange background for warning alerts */
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .btn-primary {
+            background-color: #337ab7;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #23527c;
+        }
+
+        /* User List Styles */
+        .user-list {
+            margin-top: 20px;
+        }
+
+        .user-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-item img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <br>
+    <br>
+    <!-- Header Section -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container">
+                <ul class="nav-list">
+                    {% if request.user.is_authenticated %}
+                        <li><a href="{% url 'ceoindex' %}">Home</a></li>
+                        <li><a href="{% url 'signup' %}">Users</a></li>
+                        <li><a href="{% url 'file_list' %}">Files</a></li>
+                        <li><a href="{% url 'asignTask' %}">Tasks</a></li>
+                        <li><a href="{% url 'user_list' %}">Chat</a></li>
+                        <li><a href="{% url 'ai' %}">Kero</a></li>
+                        <li><a href="{% url 'notifications' %}">Notifications</a></li>
+                        <li><a href="{% url 'videosetup' %}">Meeting</a></li>
+                        <li><a href="{% url 'ceo_profile' %}">Profile</a></li>
+                        <li><a href="{% url 'logout' %}">Logout</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Section -->
+    <main class="main-content">
+        <!-- Message Display Section -->
+        {% for message in messages %}
+        <div id="myAlert" class="alert alert-{{ message.tags }}" role="alert">
+            <p>{{ message }}</p>
+        </div>
+        <script>
+        // Auto-hide alert after 4 seconds
+        setTimeout(() => {
+            document.getElementById('myAlert').style.display = 'none';
+        }, 4000);
+        </script>
+        {% endfor %}
+
+        <h1>Search</h1>
+        
+        <form action="{% url 'signup' %}" method="get">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username">
+            </div>
+            <button type="submit" class="btn-primary">Search</button>
+        </form>
+
+
+
+
+        <h2>Result</h2>
+        <div class="user-list">
+            {% if results %}
+            {% for result in results %}
+              <div class="user-item">
+                <img src="{{ result.his_profile.profile_photo.url }}"
+                     alt="Profile Photo for {{ result.username }}"
+                     onerror="this.src='/media/default_profile_pic.jpg'"
+                     class="img-thumbnail rounded-circle mb-3">
+                <h3>ID: {{ result.id }}</h3>
+                <h3>Email: {{ result.email }}</h3>
+                <h3>Username: {{ result.username }}</h3>
+                <h3><a href="{% url 'details' user_id=result.id %}">Details</a></h3>
+              </div>
+            {% endfor %}
+            {% else %}
+                <li>No results found.</li>
+            {% endif %}
+        </div>
+
+
+
+
+
+        
+        <br>
+        <h1>Create New User Manually</h1>
+        <form action="{% url 'signup' %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password1">Password:</label>
+                <input type="password" id="password1" name="password1" required>
+            </div>
+            <div class="form-group">
+                <label for="password2">Confirm Password:</label>
+                <input type="password" id="password2" name="password2" required>
+            </div>
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="first_name">First Name:</label>
+                <input type="text" id="first_name" name="first_name" required>
+            </div>
+            <div class="form-group">
+                <label for="last_name">Last Name:</label>
+                <input type="text" id="last_name" name="last_name" required>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn-primary">
+            </div>
+        </form>
+
+        <br>
+
+        <br>
+        <form action="{% url 'multiusercreation' %}" method="post">
+            {% csrf_token %}
+            <h3>Create Multiple Users Automatically</h3>
+            <div class="form-group">
+                <label for="user_count">Number of Users:</label>
+                <input type="number" id="user_count" name="user_count" min="0" max="30" value="0" required>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn-primary">
+            </div>
+        </form>
+
+        <div class="user-list">
+            {% for user in users %}
+              <div class="user-item">
+                <img src="{{ user.his_profile.profile_photo.url }}"
+                     alt="Profile Photo for {{ user.username }}"
+                     onerror="this.src='/media/default_profile_pic.jpg'"
+                     class="img-thumbnail rounded-circle mb-3">
+                <h3>ID: {{ user.id }}</h3>
+                <h3>Email: {{ user.email }}</h3>
+                <h3>Username: {{ user.username }}</h3>
+                <h3><a href="{% url 'details' user_id=user.id %}">Details</a></h3>
+              </div>
+            {% endfor %}
+        </div>
+    </main>
+
+</body>
+</html>

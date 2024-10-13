@@ -1,0 +1,262 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Details</title>
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Header Section */
+        .header {
+            background-color: #333;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+        }
+
+        .navbar {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nav-list li {
+            margin-right: 20px;
+        }
+
+        .nav-list a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .nav-list a:hover {
+            color: #ccc;
+        }
+
+        /* Main Content Section */
+        .main-content {
+            max-width: 1200px;
+            margin: 60px auto 20px; /* Adjusted margin for fixed header */
+            padding: 2rem 1rem;
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .alert {
+            padding: 10px;
+            margin: 20px 0;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #f44336; /* Red background for alert */
+        }
+
+        .alert-info {
+            background-color: #2196F3; /* Blue background for info alerts */
+        }
+
+        .alert-success {
+            background-color: #4CAF50; /* Green background for success alerts */
+        }
+
+        .alert-warning {
+            background-color: #ff9800; /* Orange background for warning alerts */
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .btn-primary {
+            background-color: #337ab7;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #23527c;
+        }
+
+        /* User Photo */
+        .img-thumbnail {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container">
+                <ul class="nav-list">
+                    {% if request.user.is_authenticated %}
+                        <li><a href="{% url 'ceoindex' %}">Home</a></li>
+                        <li><a href="{% url 'signup' %}">Users</a></li>
+                        <li><a href="{% url 'file_list' %}">Files</a></li>
+                        <li><a href="{% url 'asignTask' %}">Tasks</a></li>
+                        <li><a href="{% url 'user_list' %}">Chat</a></li>
+                        <li><a href="{% url 'ai' %}">Kero</a></li>
+                        <li><a href="{% url 'notifications' %}">Notifications</a></li>
+                        <li><a href="{% url 'videosetup' %}">Meeting</a></li>
+                        <li><a href="{% url 'ceo_profile' %}">Profile</a></li>
+                        <li><a href="{% url 'logout' %}">Logout</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Section -->
+    <main class="main-content">
+        <!-- Message Display Section -->
+        {% for message in messages %}
+        <div id="myAlert" class="alert alert-{{ message.tags }}" role="alert">
+            <p>{{ message }}</p>
+        </div>
+        <script>
+        // Auto-hide alert after 4 seconds
+        setTimeout(() => {
+            document.getElementById('myAlert').style.display = 'none';
+        }, 4000);
+        </script>
+        {% endfor %}
+
+        <img src="{{ user_wanted.his_profile.profile_photo.url }}"
+             alt="Profile Photo for {{ user_wanted.username }}"
+             onerror="this.src='/media/default_profile_pic.jpg'"
+             class="img-thumbnail">
+
+        <h2>User Details</h2>
+        <h3>ID: {{ use_id }}</h3>
+        <h3>Email: {{ user_email }}</h3>
+        <h3>Username: {{ user_username }}</h3>
+        <h3>First Name: {{ f_name }}</h3>
+        <h3>Last Name: {{ l_name }}</h3>
+        <h3>Last Login: {{ user_last_login }}</h3>
+        <h3>Status: {{ status }}</h3>
+        <h3>CEO Status: {{ is_ceo }}</h3>
+        
+        <br>
+
+        <h2>Change Email</h2>
+        <form action="{% url 'change_email' user_id=use_id %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="original_email">Original Email:</label>
+                <h4>{{ user_email }}</h4>
+                <label for="new_email">New Email:</label>
+                <input type="email" id="new_email" name="new_email" required>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Change" class="btn-primary">
+            </div>
+        </form>
+
+        <h3>Change Password</h3>
+        <form action="{% url 'change_password' user_id=use_id %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+
+                <label for="new_pass">New Password:</label>
+                <input type="password" id="new_pass" name="new_pass" required>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Change" class="btn-primary">
+            </div>
+        </form>
+
+        <h3>Change Username</h3>
+        <form action="{% url 'change_username' user_id=use_id %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="current_username">Original Username:</label>
+                <h4>{{ user_username }}</h4>
+                <label for="new_username">New Username:</label>
+                <input type="text" id="new_username" name="new_username" required>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Change" class="btn-primary">
+            </div>
+        </form>
+
+        <h3>Change Status</h3>
+        <form action="{% url 'change_status' user_id=use_id %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <h4>Current Status: {{ status }}</h4>
+                <input type="radio" id="true_option" name="new_status" value="True" {% if status %}checked{% endif %}>
+                <label for="true_option">True</label>
+                <input type="radio" id="false_option" name="new_status" value="False" {% if not status %}checked{% endif %}>
+                <label for="false_option">False</label>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Change Status" class="btn-primary">
+            </div>
+        </form>
+
+        <h3>Remove User</h3>
+        <form action="{% url 'delete_user' user_id=use_id %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="delete_user">User:</label>
+                <h4>{{ user_username }}</h4>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Delete User" class="btn-primary">
+            </div>
+        </form>
+    </main>
+
+</body>
+</html>

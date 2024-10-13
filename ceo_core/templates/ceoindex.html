@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ceo index</title>
+
+    <style>
+
+        /* Global Styles */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Header Section */
+
+.header {
+    background-color: #333;
+    color: #fff;
+    padding: 1rem;
+    text-align: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.navbar {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.nav-list li {
+    margin-right: 20px;
+}
+
+.nav-list a {
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.nav-list a:hover {
+    color: #ccc;
+}
+
+/* Main Content Section */
+
+.main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+h1 {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Task List Section */
+
+.task-list {
+    margin-bottom: 20px;
+}
+
+.task-list h2 {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.task-list ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.task-list li {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.task-list a {
+    text-decoration: none;
+    color: #337ab7;
+    transition: color 0.2s ease;
+}
+
+.task-list a:hover {
+    color: #23527c;
+}
+
+/* Create Task Form */
+
+.create-task {
+    margin-top: 20px;
+}
+
+.create-task h2 {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.create-task form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.create-task label {
+    margin-bottom: 10px;
+}
+
+.create-task input[type="text"] {
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.create-task button[type="submit"] {
+    background-color: #337ab7;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.create-task button[type="submit"]:hover {
+    background-color: #23527c;
+}
+    </style>
+</head>
+<body>
+    <br>
+    <br>
+    <!-- Header Section -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container">
+                <ul class="nav-list">
+                    {% if request.user.is_authenticated %}
+                        <li><a href="{% url 'ceoindex' %}">home</a></li>
+                        <li><a href="{% url 'signup' %}">users</a></li>
+                        <li><a href="{% url 'file_list' %}">files</a></li>
+                        <li><a href="{% url 'asignTask' %}">tasks</a></li>
+                        <li><a href="{% url 'user_list' %}">chat</a></li>
+                        <li><a href="{% url 'ai' %}">Kero</a></li>
+                        <li><a href="{% url 'notifications' %}">Notifications</a></li>
+                        <li><a href="{% url 'videosetup' %}">meeting</a></li>
+                        <li><a href="{% url 'ceo_profile' %}">profile</a></li>
+                        <li><a href="{% url 'logout' %}">logout</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Section -->
+    <main class="main-content">
+        <h1>ceo index</h1>
+        <section class="task-list">
+            <h2>Tasks</h2>
+            <ul>
+                {% for element in todoelements %}
+                    <li>
+                        <p>{{ element.task }} at {{ element.date_Created }}</p>
+                        <a href="{% url "change" pk=element.id %}">details</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <!-- Create Task Form -->
+        <section class="create-task">
+            <h2>Create Task</h2>
+            <form action="{% url "createtask" %}" method='post'>
+                {% csrf_token %}
+                <label for="task-disc">Task:</label>
+                <input type="text" id="task-disc" name="taskdisc" required>
+                <button type="submit">Create</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

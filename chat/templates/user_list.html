@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User List</title>
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+    
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+    
+        /* Header Section */
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 1rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+    
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+    
+        .nav-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+        }
+    
+        .nav-list li {
+            margin-right: 20px;
+        }
+    
+        .nav-list a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+    
+        .nav-list a:hover {
+            color: #ccc;
+        }
+    
+        /* Main Content Section */
+        .main-content {
+            max-width: 1200px;
+            margin: 80px auto 20px; /* Adjusted margin for fixed header */
+            padding: 2rem 1rem;
+        }
+    
+        h1 {
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+    
+        .alert {
+            padding: 10px;
+            margin: 20px 0;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #f44336; /* Red background for alert */
+        }
+    
+        .alert-info {
+            background-color: #2196F3; /* Blue background for info alerts */
+        }
+    
+        .alert-success {
+            background-color: #4CAF50; /* Green background for success alerts */
+        }
+    
+        .alert-warning {
+            background-color: #ff9800; /* Orange background for warning alerts */
+        }
+    
+        /* Form Styles */
+        form {
+            margin-bottom: 30px;
+        }
+    
+        .form-group {
+            margin-bottom: 15px;
+        }
+    
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+    
+        .form-group input[type="text"],
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    
+        .btn-primary {
+            background-color: #337ab7;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+    
+        .btn-primary:hover {
+            background-color: #23527c;
+        }
+    
+        /* List Styles */
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+    
+        ul li {
+            margin-bottom: 20px; /* Add some space between list items */
+        }
+    
+        ul li img {
+            border-radius: 50%; /* Make the image round */
+            width: 100px; /* Set a fixed width */
+            height: 100px; /* Set a fixed height */
+            object-fit: cover; /* Ensure the image fits the circle */
+            display: block; /* Display the image as a block element */
+            margin-bottom: 10px; /* Add some space below the image */
+        }
+    
+        ul li form {
+            margin-top: 10px; /* Add space above the form */
+        }
+    
+        ul li a {
+            text-decoration: none;
+            color: #337ab7;
+        }
+    
+        ul li a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    
+    <script>
+        // JavaScript function to update the title input field with the file name
+        function updateTitleWithFileName() {
+            const fileInputs = document.querySelectorAll('input[name="file"]');
+            fileInputs.forEach(fileInput => {
+                const titleInput = fileInput.parentNode.querySelector('input[name="title"]');
+                if (fileInput && titleInput) {
+                    fileInput.addEventListener('change', function() {
+                        const fileName = fileInput.files[0] ? fileInput.files[0].name : '';
+                        titleInput.value = fileName; // Update title input with file name
+                    });
+                }
+            });
+        }
+
+        // Initialize the function when the document loads
+        document.addEventListener('DOMContentLoaded', updateTitleWithFileName);
+    </script>
+</head>
+<body>
+    <!-- Message Display Section -->
+    {% for message in messages %}
+    <div id="myAlert" class="alert alert-{{ message.tags }}" role="alert">
+        <p>{{ message }}</p>
+    </div>
+    <script>
+    // Auto-hide alert after 4 seconds
+    setTimeout(() => {
+        const alertElement = document.getElementById('myAlert');
+        if (alertElement) {
+            alertElement.style.display = 'none';
+        }
+    }, 4000);
+    </script>
+    {% endfor %}
+
+    <nav class="navbar">
+        <div class="container">
+            <ul class="nav-list">
+                {% if request.user.is_authenticated and request.user.is_ceo %}
+                <li><a href="{% url 'ceoindex' %}">Home</a></li>
+                <li><a href="{% url 'signup' %}">Users</a></li>
+                <li><a href="{% url 'file_list' %}">Files</a></li>
+                <li><a href="{% url 'asignTask' %}">Tasks</a></li>
+                <li><a href="{% url 'user_list' %}">Chat</a></li>
+                <li><a href="{% url 'ai' %}">Kero</a></li>
+                <li><a href="{% url 'notifications' %}">Notifications</a></li>
+                <li><a href="{% url 'videosetup' %}">meeting</a></li>
+                <li><a href="{% url 'ceo_profile' %}">Profile</a></li>
+                <li><a href="{% url 'logout' %}">Logout</a></li>
+                {% elif request.user.is_authenticated and not request.user.is_ceo %}
+                <li><a href="{% url 'employeeindex' %}">Home</a></li>
+                <li><a href="{% url 'employee_file_list' %}">Files</a></li>
+                <li><a href="{% url 'user_list' %}">Chat</a></li>
+                <li><a href="{% url 'ai' %}">Kero</a></li>
+                <li><a href="{% url 'notifications' %}">Notifications</a></li>
+                <li><a href="{% url 'videosetup' %}">meeting</a></li>
+                <li><a href="{% url 'employee_profile' %}">Profile</a></li>
+                <li><a href="{% url 'logout' %}">Logout</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <h1>Users</h1>
+
+        <!-- Search Form -->
+        <form method="get" action="{% url 'user_list' %}">
+            <div class="form-group">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Search users..." />
+            </div>
+            <button type="submit" class="btn-primary">Search</button>
+        </form>
+        <br>
+        <br>
+        <ul>
+            {% for user in users %}
+            <li>
+                <img src="{{ user.his_profile.profile_photo.url }}" alt="Profile Photo" class="profile-image" onerror="this.src='/media/default_profile_pic.jpg'">
+                 <h3>{{ user.username }}</h3>
+                 <a href="{% url 'start_chat' user.id %}"> message</a>
+                <form action="{% url 'send_file' user.id %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="text" name="title" placeholder="Enter file title" required />
+                        <input type="file" name="file" required />
+                        <button type="submit" class="btn-primary">Send File</button>
+                    </div>
+                </form>
+                <br>
+            </li>
+            {% empty %}
+            <li>No users found.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

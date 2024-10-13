@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Header Section */
+        .header {
+            background-color: #333;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nav-list li {
+            margin-right: 20px;
+        }
+
+        .nav-list a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .nav-list a:hover {
+            color: #ccc;
+        }
+
+        /* Main Content Section */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            padding-top: 5rem; /* Adjust padding-top to account for the fixed header */
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-weight: bold;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            color: #333;
+        }
+
+        /* Chat Room Interface */
+        #chat-log {
+            width: 100%;
+            height: 400px;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .message.sent {
+            align-items: flex-end;
+        }
+
+        .message-username {
+            font-weight: bold;
+            margin-bottom: 0.2rem;
+            color: #007bff;
+        }
+
+        .message-box {
+            max-width: 60%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            background-color: #e1ffc7;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        .message.received .message-box {
+            background-color: #fff;
+        }
+
+        .message-box::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+
+        .message.sent .message-box::after {
+            border-color: #e1ffc7 transparent transparent transparent;
+            border-width: 10px 10px 0 0;
+            top: 0;
+            right: -10px;
+        }
+
+        .message.received .message-box::after {
+            border-color: #fff transparent transparent transparent;
+            border-width: 10px 0 0 10px;
+            top: 0;
+            left: -10px;
+        }
+
+        #chat-message-input {
+            width: calc(100% - 22px);
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            outline: none;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        #chat-message-submit {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        #chat-message-submit:hover {
+            background-color: #0056b3;
+        }
+
+        /* Alert Styles */
+        .alert {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container">
+                <ul class="nav-list">
+                    {% if request.user.is_authenticated and request.user.is_ceo %}
+                    <li><a href="{% url 'ceoindex' %}">Home</a></li>
+                    <li><a href="{% url 'signup' %}">Users</a></li>
+                    <li><a href="{% url 'file_list' %}">Files</a></li>
+                    <li><a href="{% url 'asignTask' %}">Tasks</a></li>
+                    <li><a href="{% url 'user_list' %}">Chat</a></li>
+                    <li><a href="{% url 'ai' %}">Kero</a></li>
+                    <li><a href="{% url 'notifications' %}">Notifications</a></li>
+                    <li><a href="{% url 'videosetup' %}">Meeting</a></li>
+                    <li><a href="{% url 'ceo_profile' %}">Profile</a></li>
+                    <li><a href="{% url 'logout' %}">Logout</a></li>
+                    {% elif request.user.is_authenticated %}
+                    <li><a href="{% url 'employeeindex' %}">Home</a></li>
+                    <li><a href="{% url 'employee_file_list' %}">Files</a></li>
+                    <li><a href="{% url 'user_list' %}">Chat</a></li>
+                    <li><a href="{% url 'ai' %}">Kero</a></li>
+                    <li><a href="{% url 'notifications' %}">Notifications</a></li>
+                    <li><a href="{% url 'videosetup' %}">Meeting</a></li>
+                    <li><a href="{% url 'employee_profile' %}">Profile</a></li>
+                    <li><a href="{% url 'logout' %}">Logout</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Section -->
+    <main class="main-content">
+        <!-- Message Display Section -->
+        {% for message in messages %}
+        <div id="myAlert" class="alert alert-{{ message.tags }}" role="alert">
+            <p>{{ message }}</p>
+        </div>
+        <script>
+        // Auto-hide alert after 4 seconds
+        setTimeout(() => {
+            const alertElement = document.getElementById('myAlert');
+            if (alertElement) {
+                alertElement.style.display = 'none';
+            }
+        }, 4000);
+        </script>
+        {% endfor %}
+
+        <!-- Chat Room Interface -->
+        <h1>Chat Room</h1>
+        <div id="chat-log">
+            <!-- Messages will be dynamically added here -->
+        </div>
+        <input id="chat-message-input" type="text" placeholder="Type your message here..." />
+        <input id="chat-message-submit" type="button" value="Send" />
+    </main>
+
+    <script>
+        // Establish WebSocket connection
+        const roomId = "{{ room_id }}";
+        const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + roomId + '/');
+
+        // Handle incoming messages
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const chatLog = document.querySelector('#chat-log');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${data.sender === 'me' ? 'sent' : 'received'}`;
+            
+            const messageBoxDiv = document.createElement('div');
+            messageBoxDiv.className = 'message-box';
+            
+            // Create a div for the sender's username
+            const usernameDiv = document.createElement('div');
+            usernameDiv.className = 'message-username';
+            usernameDiv.textContent = data.sender; // Set sender's username
+            
+            messageBoxDiv.textContent = data.message;
+            
+            messageDiv.appendChild(usernameDiv); // Add username div to message div
+            messageDiv.appendChild(messageBoxDiv); // Add message box to message div
+            chatLog.appendChild(messageDiv);
+            chatLog.scrollTop = chatLog.scrollHeight; // Auto-scroll to the bottom
+        };
+
+        // Handle WebSocket closure
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        // Handle sending messages
+        document.querySelector('#chat-message-input').focus();
+        document.querySelector('#chat-message-input').onkeyup = function(e) {
+            if (e.key === 'Enter') {
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+
+        document.querySelector('#chat-message-submit').onclick = function() {
+            const messageInputDom = document.querySelector('#chat-message-input');
+            const message = messageInputDom.value;
+            chatSocket.send(JSON.stringify({'message': message, 'sender': 'me'})); // Assuming 'me' for now
+            messageInputDom.value = '';
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        /* Header Section */
+        .header {
+            background-color: #333;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+        }
+
+        .navbar {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nav-list li {
+            margin-right: 20px;
+        }
+
+        .nav-list a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .nav-list a:hover {
+            color: #ccc;
+        }
+
+        /* Main Content Section */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            margin-top: 60px;
+        }
+
+        h1 {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* Notification List Section */
+        .notification-list h2 {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .notification-list ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .notification-list li {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-list button {
+            padding: 5px 10px;
+            background-color: #d9534f;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .notification-list button:hover {
+            background-color: #c9302c;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container">
+                <ul class="nav-list">
+                    {% if request.user.is_authenticated and request.user.is_ceo %}
+                    <li><a href="{% url 'ceoindex' %}">Home</a></li>
+                    <li><a href="{% url 'signup' %}">Users</a></li>
+                    <li><a href="{% url 'file_list' %}">Files</a></li>
+                    <li><a href="{% url 'asignTask' %}">Tasks</a></li>
+                    <li><a href="{% url 'user_list' %}">Chat</a></li>
+                    <li><a href="{% url 'ai' %}">Kero</a></li>
+                    <li><a href="{% url 'notifications' %}">Notifications</a></li>
+                    <li><a href="{% url 'videosetup' %}">meeting</a></li>
+                    <li><a href="{% url 'ceo_profile' %}">Profile</a></li>
+                    <li><a href="{% url 'logout' %}">Logout</a></li>
+                    {% elif request.user.is_authenticated %}
+                    <li><a href="{% url 'employeeindex' %}">Home</a></li>
+                    <li><a href="{% url 'employee_file_list' %}">Files</a></li>
+                    <li><a href="{% url 'user_list' %}">Chat</a></li>
+                    <li><a href="{% url 'ai' %}">Kero</a></li>
+                    <li><a href="{% url 'notifications' %}">Notifications</a></li>
+                    <li><a href="{% url 'videosetup' %}">meeting</a></li>
+                    <li><a href="{% url 'employee_profile' %}">Profile</a></li>
+                    <li><a href="{% url 'logout' %}">Logout</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Section -->
+    <main class="main-content">
+        <h1>Notifications</h1>
+
+        <!-- Notification List -->
+        <div class="notification-list">
+            <h2>Your Notifications:</h2>
+            <ul id="notifications">
+                <!-- Notifications will be dynamically added here -->
+            </ul>
+        </div>
+    </main>
+
+    <!-- JavaScript for WebSocket and Notification Handling -->
+    <script>
+        // Track whether the user has interacted with the page
+        let userInteracted = false;
+    
+        // Set userInteracted to true on any click or key press
+        function enableAudioPlayback() {
+            userInteracted = true;
+            document.removeEventListener('click', enableAudioPlayback); // Remove listener once the user interacts
+            document.removeEventListener('keydown', enableAudioPlayback);
+        }
+    
+        document.addEventListener('click', enableAudioPlayback);
+        document.addEventListener('keydown', enableAudioPlayback);
+    
+        // Establish WebSocket connection
+        const socket = new WebSocket(`ws://${window.location.host}/ws/notifications/`);
+    
+        // Handle incoming WebSocket messages (for new notifications)
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const notification = data.notification;
+            const isNew = data.is_new;
+            console.log(data.main_id);
+            console.log(data.notification);
+            console.log(isNew);
+    
+            // Play notification sound only for new notifications and if the user has interacted with the page
+            if (isNew) {
+                const audio = new Audio('/static/sound/notification.mp3');
+                audio.play().then(() => {
+                    console.log("Notification sound played successfully");
+                }).catch(error => {
+                    console.error("Audio play error:", error);
+                });
+            }
+    
+            // Append new notification to the list
+            const notificationsList = document.getElementById('notifications');
+            const li = document.createElement('li');
+            li.id = `notification-${data.main_id}`;
+            li.innerHTML = `
+                ${notification}
+                <button onclick="deleteNotification(${data.main_id})">Delete</button>
+            `;
+            notificationsList.appendChild(li);
+        };
+    
+        // Handle WebSocket closure
+        socket.onclose = function(event) {
+            console.error('WebSocket closed unexpectedly');
+        };
+    
+        // Delete notification function
+        function deleteNotification(notificationId) {
+            fetch(`/chat/notificationsdelete/${notificationId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => {
+                if (res.ok) {
+                    // Remove the notification from the DOM
+                    document.getElementById(`notification-${notificationId}`).remove();
+                } else {
+                    console.error('Failed to delete the notification');
+                }
+            })
+            .catch(err => console.error('Error:', err));
+        }
+    </script>
+    
+</body>
+</html>
